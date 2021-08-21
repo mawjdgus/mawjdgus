@@ -7,13 +7,16 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import numpy as np
+from torch.nn.modules import loss
 from torch.nn.modules.activation import LeakyReLU
 from torch.nn.modules.batchnorm import BatchNorm1d
-from torch import optim
+from torch import optim, zero_
 import torchvision
 from torchvision import transforms
 from torchvision.datasets import utils
 from torchvision.transforms.transforms import CenterCrop
+
+import matplotlib.pyplot as plt
 
 PATH = './myenv/bin/GANs/VanillaGANs/data/'
 
@@ -66,11 +69,11 @@ num_workers=workers)
 
 
 class Generator(nn.Module):
-    def __init__(self, z_dim):
+    def __init__(self):
         super(Generator, self).__init__()
 
         self.fc0 = nn.Sequential(
-            nn.Linear(z_dim, ngf), # 128
+            nn.Linear(nz, ngf), # 128
             nn.LeakyReLU(0.2)           
         )
 
@@ -91,7 +94,6 @@ class Generator(nn.Module):
 
         self.fc4 = nn.Sequential(
             nn.Linear(ngf*8, image_size), # 784
-            nn.Tanh()
         )
 
     def forward(self, x):
@@ -138,7 +140,7 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x):
-        x = x.view(-1,1,28*28).to(device)
+        x = x.view(-1,28*28)
         x = self.fc0(x)
         x = self.fc1(x)
         x = self.fc2(x)
@@ -146,3 +148,55 @@ class Discriminator(nn.Module):
         x = self.fc4(x)
         return x
 
+
+criterion = torch.nn.BCELoss()
+
+
+discriminator = Discriminator().to(device)
+generator = Generator().to(device)
+
+optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
+
+
+
+
+for epoch in range(num_epochs):
+    for idx, (imgs, _) in enumerate(train_iter):
+        idx += 1
+
+        real_images = imgs.to(device) 
+        pred_real_images = discriminator(real_images)
+        real_label = torch.ones(real_images.shape[0], 1, requires_grad=True).to(device)
+
+        latent_z = (torch.rand(real_images.shape[0], nz) - 0.5) / 0.5
+        latent_z = latent_z.to(device)
+
+        fake_images = generator(latent_z)
+        pred_fake_images = discriminator(fake_images)
+        fake_label = torch.zeros(fake_images.shape[0], 1, requires_grad=True).to(device)
+
+        
+        outputs = torch.cat((pred_real_images, pred_fake_images), 0)
+        targets = torch.cat((real_label, fake_label), 0)
+
+        loss_D = criterion(outputs, targets.detach())
+        optimizer_D.zero_grad()
+        loss_D.backward()
+        optimizer_D.step()
+
+        latent_z = (torch.rand(real_images.shape[0], nz) - 0.5) / 0.5
+        latent_z = latent_z.to(device)
+
+        fake_images = generator(latent_z)
+        pred_fake_images = discriminator(fake_images)
+        fake_label = torch.ones(fake_images.shape[0], 1, requires_grad=True).to(device)
+        loss_G = criterion(pred_fake_images, fake_label.detach())
+        optimizer_G.zero_grad()
+        loss_G.backward()
+        optimizer_G.step()
+
+        if idx % 100 == 0 or idx == len(train_iter):
+            print('Epoch {} Iteration {} : loss_D {:.5f} loss_G {:.5f}'.format(epoch, idx, loss_D.item(), loss_G.item()))
+            print(generator(latent_z)[0])
+            break
