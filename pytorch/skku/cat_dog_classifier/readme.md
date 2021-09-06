@@ -1,3 +1,5 @@
+출처 : https://deep-learning-study.tistory.com/529
+
 Using Xception to classificate cat and dog
 
 
@@ -76,7 +78,7 @@ pointwise convolution 이후에 depthwise convolution을 사용합니다.
 각 출력값은 **concatenate** 됩니다.
 
 
-**(1) 연산의 순서가 다릅니다. **
+**(1) 연산의 순서가 다릅니다.**
 
 기존 depthwise separable convolution은 depthwise convolution(3x3 conv)를 먼저 수행하고 pointwise convoltion(1x1 conv)를 수행합니다. 
 
@@ -108,10 +110,12 @@ Xception은 14개 모듈로 이루어져있고,
 
 ![image](https://user-images.githubusercontent.com/67318280/132189245-03b32560-29ce-4826-93b3-85ba21c05f8f.png)
 
+그리고 이놈을 이용해 Cat Dog 분류기를 만들어 봤습니다.
 
 
 
 
 
 
-출처 : https://deep-learning-study.tistory.com/529
+
+
