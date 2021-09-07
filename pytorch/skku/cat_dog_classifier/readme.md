@@ -2,6 +2,8 @@
 
 Using Xception to classificate cat and dog
 
+ - 0907 cutmix추가
+
 
 **Xception**은 Inception 모듈에 대한 고찰로 탄생한 모델입니다. 
 
