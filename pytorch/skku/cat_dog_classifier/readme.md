@@ -1,8 +1,9 @@
 출처 : https://deep-learning-study.tistory.com/529
 
 Using Xception to classificate cat and dog
+ - 0906 기본 Xception : Late submission score 1.6 달성 ( 1등 0.003 )
 
- - 0907 cutmix추가
+ - 0907 cutmix추가 : Late submission score 0.4 달성
 
 
 **Xception**은 Inception 모듈에 대한 고찰로 탄생한 모델입니다. 
