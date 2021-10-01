@@ -85,22 +85,94 @@ In order to understand that, we must wrap out head around the concept of anchors
 
 ## Anchor Boxes
 
-It might make sense to predict the width and the height of the bounding box, but in practice, that leads to unstable gradients during training.<br>
-Instead, most of the modern object detectors predict log-space transforms, or simply offsets to pre-defined default bounding boxes called anchors.
+It might make sense to predict the width and the height of the **bounding box**, but in practice, that **leads to unstable gradients during training**.<br>
+Instead, **most of the modern object detectors predict log-space transforms, or simply offsets to pre-defined default bounding boxes called anchors**.
 
 Then, these transforms are applied to the anchor boxes to obtain the prediction.<br>
-YOLO v3 has three anchors, which result in prediction of three bounding boxes per cell.
+YOLO v3 has **three anchors**, which result in prediction of three bounding boxes per cell.
 
-Coming back to our earlier question, the bounding box responsible for detecting the dog will be the one whose anchor has the highest **IoU** with the ground truth box.
+Coming back to our earlier question, **the bounding box responsible for detecting the dog** will be the one whose anchor has the highest **IoU** with the ground truth box.
 
 ## Making Predictions
 
 The following formulae describe how the network output is transformed to obtain bounding box predictions.
 ![image](https://user-images.githubusercontent.com/67318280/135372351-ffdaa776-4b91-41f1-b55a-7ea7bca77626.png)
 
-bx, by, bw, bh are the x,y center co-ordinates, width and height of our prediction. tx, ty, tw, th is what the network outputs. cx and cy are the top-left co-ordinates of the grid. <br>
-pw and ph are anchors dimensions for the box.
+bx, by, bw, bh are the **x,y center co-ordinates**, width and height of our prediction. tx, ty, tw, th is **what the network outputs**. cx and cy are the **top-left co-ordinates of the grid**. <br>
+pw and ph are anchors **dimensions** for the box.
 
 **Center Coordinates**
 
+Notice we are running our center coordinates prediction through a sigmoid function. This forces the value of the output to be between 0 and 1. Why should this be the case? Bear with me.
+
+**Normally, YOLO doesn't predict the absolute coordinates of the bounding box's center.** It predicts offsets which are:
+- Relative to the top left corner of the grid cell which is predicting the object.
+- Normalised by the dimensions of the cell from the feature map, which is, 1
+
+For wxample, consider the case of our dog image. If the prediction for center is (0.4, 0.7), then this means that the center lies at (6.4, 6.7) on the 13 x 13 feature map. ( Since the top-left co-ordinates of the red cell are (6,6)).
+
+But wait, what happens if the predicted x,y co-ordinates are greater than one, say (1.2, 0.7). This means center lies at (7.2, 6.7). Notice the center now lies in cell just right to our red cell, or the 8th cell in the 7th row. **This breaks theory behind YOLO** because if we postulate that the red box is responsible for predicting the dog, the center of the dog must lie in the red cell, and not in the one beside it.
+
+Therefore, to remedy this problem, the output is passed through a sigmoid function, which squashes the output in a range from 0 to 1, effectively keeping the center in the grid which is predicting.
+
+## Dimensions of the Bounding Box
+
+The dimensions of the bounding box are predicted by applying a log-space transform to the output and then multiplying with an anchor.
+
+![image](https://user-images.githubusercontent.com/67318280/135552270-9e37f834-98f2-471e-a772-6c9ba0784e3c.png)
+
+How the detector output is transformed to give the final prediction. Image Credits.
+http://christopher5106.github.io/
+
+The resultant predictins, bw and bh, are normalised by the height and width of the image.(Training labels are chosen this way). So if the predictions bx and by for the box containing the dog are(0.3, 0.8), then the actual width and height on 13 x 13 feature map is (13 x 0.3, 13 x 0.8).
+
+## Objectness Score
+
+Object score represents the probability that an object is contained inside a bounding box. It should be nearly 1 for the red and the neighboring grids, whereas almost 0 for, say, the grid at the corners.
+
+The objectness score is also passed through a sigmoid, as it is to be interpreted as a probability.
+
+## Class Confidences
+
+Class confidences represent **the probabilities of the detected object belonging to a particular class** (Dog, cat, banana, car etc). **Before v3, YOLO used to softmax the class scores**.
+
+However, that design choice has been dropped in v3, and authors have opted for using sigmoid instead. The reason is that Softmaxing class scores assume that the classes are ***mutually exclusive***. In simple words, if an object belongs to one class, then **it's guaranteed it cannot belong to another class**. This is true for COCO database on which we will base our detector.
+
+However, this assumptions may not hold **when we have classes like Women and Person**. This is the reason that authors have steered clear of using a Softmax activation.
+
+## Prediction across different scales.
+
+YOLO v3 makes prediction across 3 different scales.The detection layer is used make detection at feature maps of three different sizes, **having strides 32, 16, 8 repectively**. This means, with an input of 416 x 416, we make detections on scales 13 x 13, 26 x 26 and 52 x 52.
+
+The network downsamples the input image **until the first detection layer**, where **a detection is made using feature maps of a layer with stride 32**.
+Further, layers are upsampled by a factor of 2 and concatenated with feature maps of a previous layers having identical feature map sizes. Another detection is now made at layer with stride 16. The same upsampling procedure is repeated, and a final detection is made at the layer of stride 8.
+
+At each scale, each cell predicts 3 bounding boxes using 3 anchors, making the total number of anchors used 9. (The anchors are different for different scales)
+
+![image](https://user-images.githubusercontent.com/67318280/135554392-734d3e91-4304-4052-bed6-645684264096.png)
+
+The authors report that this helps YOLO v3 get better at detecting small objects, a frequent complaint with the earlier versions of YOLO. Upsampling can help the network learn fine-grained features which are instrumental for detecting small objects.
+
+## Output Processing
+
+For an image of size 416 x 416, YOLO predicts ((52 x 52) + (26 x 26) + (13 x 13)) x 3 = 10647 bounding boxes. However, in case of our image, there's only one object, a dog.<br>
+How do we reduce the detections from 10647 to 1?
+
+**Thresholding by Object Confidence**
+
+Frist we filter boxes bases on their objectness score. Generally, boxes having scores below a theshold are ignored.
+
+**Non-maximum Suppression**
+
+NMS intends to cure the problem of multiple detections of the same image. For example, all the 3 bounding boxes of the red grid cell may detect a box or the adjacent cells may detect the same object.
+
+![image](https://user-images.githubusercontent.com/67318280/135554744-9538f05e-20e4-4189-85fc-c2e175c18ec3.png)
+
+If you don't know NMS, I've provided a link to a website explaining the same.
+
+## Our Implementation
+
+YOLO can only detect objects belonging to the classes present in the dataset used to train the network. We will be using the official weight file for our detector. These weights have been obtained by training the network on COCO dataset, and therefore we can detect 80 object categories.
+
+That's it for the first part. This post explains enough about the YOLO algorithm to enable you to implement the detector. However, if you want to dig deep into how YOLO works, how it's trained and how it performs compared to other detectors you can read the original papers.
 
