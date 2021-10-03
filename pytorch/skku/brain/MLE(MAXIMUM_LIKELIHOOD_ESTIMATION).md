@@ -1,4 +1,5 @@
 REFERENCE : https://towardsdatascience.com/maximum-likelihood-vs-bayesian-estimation-dd2eb4dfda8a
+REFERENCE : https://angeloyeo.github.io/2020/07/17/MLE.html
 
 # MAXIMUM LIKELIHOOD ESTIMATION
 
