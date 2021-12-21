@@ -1,0 +1,2 @@
+[2021-12-13 14:19:53,881] [main] train.py --sgpu 0 --lr 0.1 --epoch 200 --model CIFAR_ResNet18 --name test_cifar --decay 1e-4 --dataset cifar100 --dataroot /home/jeonghyeon/data/ -cls --lamda 1
+[2021-12-13 14:19:53,881] [main] Namespace(batch_size=128, cls=True, dataroot='/home/jeonghyeon/data/', dataset='cifar100', decay=0.0001, epoch=200, lamda=1.0, lr=0.1, model='CIFAR_ResNet18', name='test_cifar', ngpu=1, resume=False, saveroot='./results', sgpu=0, temp=4.0)
