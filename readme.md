@@ -7,7 +7,7 @@
 ## 💻 Skills
 
 - <img src="https://img.shields.io/badge/Python-3766AB?style=flat&logo=Python&logoColor=white"/>
-- <img src="https://img.shields.io/badge/Pytorch-FF3232?style=flat&logo=Pytorch&logoColor=white"> <img src="https://img.shields.io/badge/Numpy-1E8449?style=flat&logo=Numpy&logoColor=white"> <img src="https://img.shields.io/badge/Pandas-6E12CB?style=flat&logo=Pandas&logoColor=white"> <img src="https://img.shields.io/badge/OpenCV-6E12CB?style=flat&logo=OpenCV&logoColor=white"> 
+- <img src="https://img.shields.io/badge/Pytorch-FF3232?style=flat&logo=Pytorch&logoColor=white"> <img src="https://img.shields.io/badge/Numpy-1E8449?style=flat&logo=Numpy&logoColor=white"> <img src="https://img.shields.io/badge/Pandas-6E12CB?style=flat&logo=Pandas&logoColor=white"> <img src="https://img.shields.io/badge/OpenCV-0C70F2?style=flat&logo=OpenCV&logoColor=white"> 
 
 
 ## 🗨 Blog
