@@ -1,7 +1,8 @@
 ## 👋 About Me
 
 ![header](https://capsule-render.vercel.app/api?type=waving&color=timeGradient&height=240&section=header&text=Hi,%20I'm%20jeonghyeon%20Kim%20🥕&fontSize=36&animation=fadeIn&fontAlignY=36)
-- Industrial Information System and Engineering, Seoul National University of Science and Technology (SEOULTECH)
+- Industrial and Information Systems and Engineering, Seoul National University of Science and Technology (SEOULTECH)
+- Department of Electrical and Information Engineering (Double), Seoul National University of Science and Technology (SEOULTECH)
 - Artificial Intelligence, Sungkyunkwan University
 - Boostcamper of [Boostcamp AI Tech 2nd](https://boostcamp.connect.or.kr/about.html) by NAVER Connect Foundation
 
