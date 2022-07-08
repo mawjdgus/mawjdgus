@@ -11,7 +11,7 @@
 
 ## 🗨 Blog
 
-- [mawjdgus / tistory Blog](https://mawjdgus.tistory.com)
+- [mawjdgus / velog Blog](https://velog.io/@mawjdgus)
 
 ## 📃 BOJ / Solved.ac
 
